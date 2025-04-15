@@ -2,9 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   userInfo: {
-    uid: undefined,
-    email: undefined,
-    name: undefined,
+    uid: "",
+    email: "",
+    name: "",
   },
   isDarkTheme: false,
 };
@@ -16,9 +16,9 @@ export const authSlice = createSlice({
     changeTheme: (state, action) => {
       state.isDarkTheme = action.payload.isDarkTheme; // Update theme based on payload
     },
-    setUser: (state, action) => {
-      // Set user information based on payload
-      state.userInfo = {
+    userDetails: (state, action) => {
+      // userInfo information based on payload
+      state.userDetails = {
         uid: action.payload.uid,
         email: action.payload.email,
         name: action.payload.name,
@@ -27,5 +27,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setUser, changeTheme } = authSlice.actions;
+export const { userDetails, changeTheme } = authSlice.actions;
 export default authSlice.reducer;

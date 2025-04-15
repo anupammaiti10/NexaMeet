@@ -9,11 +9,12 @@ import {
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 // import { useDispatch } from "react-redux";
-import { setUser } from "../redux/slices/authSlice";
-import { useAppDispatch } from "../redux/hooks";
+import { userDetails } from "../redux/slices/authSlice";
+import {useAppSelector, useAppDispatch } from "../redux/hooks";
                          
 function Login() {
   const navigate = useNavigate();
+  // const selector=useAppSelector((state) => state.authSlice.userDetails);
   const dispatch = useAppDispatch();
   // onAuthStateChanged(firebaseAuth, (currentUser) => {
   //   if (currentUser) navigate("/");
@@ -25,6 +26,7 @@ function Login() {
     } = await signInWithPopup(firebaseAuth, provider);
     // console.log(displayName, email, uid);
     if (email) {
+      // Used to query Firestore documents
       const firestoreQuery = query(usersRef, where("uid", "==", uid));
       const fetchedUser = await getDocs(firestoreQuery);
       if (fetchedUser.docs.length === 0) {
@@ -34,7 +36,8 @@ function Login() {
           email,
         });
       }
-      dispatch(setUser({ uid, email: email, name: displayName }));
+
+      dispatch(userDetails({ uid, email: email, name: displayName }));
       navigate("/dashboard");
     }
   };

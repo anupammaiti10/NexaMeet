@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { getDocs, where, query } from "firebase/firestore";
 import { useAppSelector } from "../redux/hooks";
 import { usersRef } from "../utils/firebaseConfig";
@@ -14,7 +14,7 @@ function useFetchUsers() {
       const firestoreDocs = await getDocs(firestoreQuery);
       const firebaseUsers = [];
       firestoreDocs.forEach((doc) => {
-        firebaseUsers.push(doc.data());
+        firebaseUsers.push({ ...doc, label: doc.name });
       });
       setUsers(firebaseUsers);
     };
@@ -22,6 +22,12 @@ function useFetchUsers() {
   }, []);
 
   return users;
+  // users= {
+  // "email": "maitianupam567@gmail.com",
+  // "name": "Anupam Maiti",
+  // "uid": "0f6gUqwHFjXlqU4k1oWctxwdswc2",
+  // "label": "Anupam Maiti",
+  //  }
 }
 
 export default useFetchUsers;

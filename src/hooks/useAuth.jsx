@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../redux/hooks";
+import { userDetails } from "../redux/slices/authSlice";
 // Track Authentication State
 function useAuth() {
   const navigate = useNavigate();

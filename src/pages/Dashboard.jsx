@@ -17,7 +17,7 @@ function Dashboard() {
   return (
     <>
       <div style={{ display: "flex", gap: "20px", padding: "50px" }}>
-        <div onClick={() => navigate("/createmeeting")}>CreateMeeting</div>
+        <div onClick={() => navigate("/createmeeting")} style={boxStyle("gray")}>CreateMeeting</div>
         <div
           onClick={() => navigate("/meeting")}
           style={boxStyle("lightgreen")}

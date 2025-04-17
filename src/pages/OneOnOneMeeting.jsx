@@ -53,10 +53,10 @@ function OneOnOneMeeting() {
     if (!validateForm) {
       const meetingId = generateMeetingID();
       await addDoc(meetingsRef, {
-        createdBy: userDetails.uid,
-        createdAt: date.format("L"),
         meetingId,
+        createdBy: userDetails.uid,
         meetingName,
+        meetingDate: date,
         meetingType: "1on1",
         meetingUser: setUser,
       });

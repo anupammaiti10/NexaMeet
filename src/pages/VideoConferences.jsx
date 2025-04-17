@@ -54,7 +54,7 @@ function VideoConferences() {
         const meetingId = generateMeetingID();
         await addDoc(meetingsRef, {
           createdBy: userDetails.uid,
-          createdAt:date.format("L"),
+          meetingDate: date,
           meetingId,
           meetingName,
           meetingType: "videoConference",

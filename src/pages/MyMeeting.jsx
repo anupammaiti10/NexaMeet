@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import { query, where } from "firebase/firestore";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useAppSelector } from "../redux/hooks";
+import openEditLayout from "../components/openEditLayout";
 
 function MyMeeting() {
   useAuth();
@@ -36,12 +37,14 @@ function MyMeeting() {
         <div className="w-full max-w-6xl bg-white shadow-md rounded-lg p-4">
           <table className="w-full table-auto text-sm text-left border border-gray-200">
             <thead className="bg-gray-100">
-              <th className="p-2 border-b">Meeting Name</th>
-              <th className="p-2 border-b">Meeting Type</th>
-              <th className="p-2 border-b">Meeting Date</th>
-              <th className="p-2 border-b">Status</th>
-              <th className="p-2 border-b text-center">Edit</th>
-              <th className="p-2 border-b text-center">Copy Link</th>
+              <tr>
+                <th className="p-2 border-b">Meeting Name</th>
+                <th className="p-2 border-b">Meeting Type</th>
+                <th className="p-2 border-b">Meeting Date</th>
+                <th className="p-2 border-b">Status</th>
+                <th className="p-2 border-b text-center">Edit</th>
+                <th className="p-2 border-b text-center">Copy Link</th>
+              </tr>
             </thead>
             <tbody>
               {meetings.map((meeting) => {

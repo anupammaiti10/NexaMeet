@@ -1,7 +1,7 @@
 import React from "react";
 
 function DateField({ label, date,setDateValue }) {
-    const handleDateValue=()=>{
+    const handleDateValue=(e)=>{
         const selectedDate = e.target.value;
         setDateValue(selectedDate);
     }

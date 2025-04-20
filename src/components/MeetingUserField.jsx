@@ -8,6 +8,7 @@ function MeetingUserField({
   options,
   onChange,
   selectedOptions,
+  isMultiUser,
 }) {
   const selectUserFunction = (e) => {
     const selectUser = e.target.value;
@@ -36,7 +37,14 @@ function MeetingUserField({
             </option>
           ))}
         </select>
-        
+        {isMultiUser && (
+          <button
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-red-500"
+            onClick={() => onChange([])}
+          >
+            &times;
+          </button>
+        )}
       </div>
       {isInValid && error?.length > 0 && (
         <ul className="mt-1 text-sm text-red-600 space-y-0.5">

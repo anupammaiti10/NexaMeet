@@ -9,15 +9,17 @@ import { generateMeetingID } from "../utils/generateMeetingID";
 import { addDoc } from "firebase/firestore";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../redux/hooks";
 
 function OneOnOneMeeting() {
   useAuth();
   const users = useFetchUsers();
+  const { userDetails } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const [setUser, setSetUser] = useState([]);
   const [meetingName, setMeetingName] = useState("");
   const [date, setDate] = useState(Date);
-  const [showErrors, setShowErrors] = useState({
+  const [showValidateErrors, setShowValidateErrors] = useState({
     meetingName: {
       show: false,
       message: [],
@@ -72,7 +74,7 @@ function OneOnOneMeeting() {
             placeholder="Enter Meeting Name"
             isInValid={showValidateErrors.meetingName.show}
             error={showValidateErrors.meetingName.message}
-            value={value}
+            value={meetingName}
             setMeetingName={setMeetingName}
           />
           <MeetingUserField
@@ -83,6 +85,7 @@ function OneOnOneMeeting() {
             options={users}
             onChange={setSetUser}
             selectedOptions={setUser}
+            isMultiUser={false}
           />
           <DateField label="Meeting Date" date={date} setDateValue={setDate} />
           <CreateMeetingButtons createMeeting={createMeeting} />

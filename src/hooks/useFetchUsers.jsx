@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { getDocs, where, query } from "firebase/firestore";
 import { useAppSelector } from "../redux/hooks";
 import { usersRef } from "../utils/firebaseConfig";
-
+// import { docs } from 'firebase/firestore'; // or similar
 function useFetchUsers() {
   const [users, setUsers] = useState([]);
-  const uid = useAppSelector((state) => state.auth.userDetails?.uid);
+  const uid = useAppSelector((state, uid) => state.auth.userDetails?.uid);
   useEffect(() => {
     const fetchUsers = async () => {
       if (!uid) return; // Ensure uid is available before querying
@@ -13,13 +13,13 @@ function useFetchUsers() {
       const firestoreQuery = query(usersRef, where("uid", "!=", uid));
       const firestoreDocs = await getDocs(firestoreQuery);
       const firebaseUsers = [];
-      firestoreDocs.forEach((doc) => {
-        firebaseUsers.push({ ...doc, label: doc.name });
+      firestoreDocs.forEach((user) => {
+        firebaseUsers.push({ ...user, label: user.name });
       });
       setUsers(firebaseUsers);
     };
     fetchUsers();
-  }, []);
+  }, [users, uid]); // Added uid to the dependency array
 
   return users;
   // users= {

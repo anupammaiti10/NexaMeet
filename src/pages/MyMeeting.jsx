@@ -9,21 +9,26 @@ function MyMeeting() {
   useAuth();
   const [meetings, setMeetings] = useState([]);
   const userDetails = useAppSelector((state) => state.auth.userDetails);
+
   const getMyMeeting = useCallback(async () => {
-    const firestoreQuery = await query(
-      meetingsRef,
-      where("createdBy", "==", userDetails.uid)
-    );
-    const fetchedMeeting = await getDocs(firestoreQuery);
-    if (fetchedMeeting.length) {
-      const myMeetings = [];
-      fetchedMeeting.forEach((meeting) => {
-        myMeetings.push({
-          id: meeting.meetingId,
-          ...meeting.data(),
+    try {
+      const firestoreQuery = await query(
+        meetingsRef,
+        where("createdBy", "==", userDetails.uid)
+      );
+      const fetchedMeeting = await getDocs(firestoreQuery);
+      if (fetchedMeeting.length) {
+        const myMeetings = [];
+        fetchedMeeting.forEach((meeting) => {
+          myMeetings.push({
+            id: meeting.meetingId,
+            ...meeting.data(),
+          });
         });
-      });
-      setMeetings(myMeetings);
+        setMeetings(myMeetings);
+      }
+    } catch {
+      console.error("Error fetching MyMeetings: ", err);
     }
   }, [userDetails?.id]);
   useEffect(() => {

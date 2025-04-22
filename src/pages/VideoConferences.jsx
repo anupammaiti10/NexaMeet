@@ -9,15 +9,16 @@ import { generateMeetingID } from "../utils/generateMeetingID";
 import { addDoc } from "firebase/firestore";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
-import { userDetails } from "../redux/slices/authSlice";
+import { useAppSelector } from "../redux/hooks";
 function VideoConferences() {
   useAuth();
   const users = useFetchUsers();
+  const { userDetails } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
-  const [setUser, setSetUser] = useState([]);
+  const [selectedUser, setSelectedUser] = useState([]);
   const [meetingName, setMeetingName] = useState("");
-  const [date, setDate] = useState(Date);
-  const [showValidateErrors, setShowValidateErrors] = useState({
+  const [date, setDate] = useState(new Date());
+  const [showErrors, setShowErrors] = useState({
     meetingName: {
       show: false,
       message: [],
@@ -50,7 +51,7 @@ function VideoConferences() {
     return errors;
   };
   const createMeeting = async (e) => {
-    if (!validateForm) {
+    if (!validateForm()) {
       const meetingId = generateMeetingID();
       await addDoc(meetingsRef, {
         createdBy: userDetails.uid,
@@ -58,12 +59,12 @@ function VideoConferences() {
         meetingId,
         meetingName,
         meetingType: "videoConference",
-        meetingUser: setUser,
+        meetingUser: selectedUser,
       });
+      navigate("/dashboard");
     }
-    navigate("/dashboard");
   };
-  
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900">
       <div className="flex justify-center items-center flex-1 px-4 sm:px-6 lg:px-8">
@@ -71,24 +72,23 @@ function VideoConferences() {
           <MeetingNameField
             label="Meeting Name"
             placeholder="Enter Meeting Name"
-            isInValid={showValidateErrors.meetingName.show}
-            error={showValidateErrors.meetingName.message}
+            isInValid={showErrors.meetingName.show}
+            error={showErrors.meetingName.message}
             value={meetingName}
             setMeetingName={setMeetingName}
           />
           <MeetingUserField
             label="Put Users to video call"
-            isInValid={showValidateErrors.meetingUser.show}
-            error={showValidateErrors.meetingUser.message}
+            isInValid={showErrors.meetingUser.show}
+            error={showErrors.meetingUser.message}
             placeholder="Select Users"
             options={users}
-            onChange={setSetUser}
-            selectedOptions={setUser}
+            onChange={setSelectedUser}
+            selectedOptions={selectedUser}
             isMultiUser={true}
           />
           <DateField label="Meeting Date" date={date} setDateValue={setDate} />
           <CreateMeetingButtons createMeeting={createMeeting} />
-          
         </form>
       </div>
     </div>

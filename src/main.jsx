@@ -5,6 +5,8 @@ import "./App.css";
 import App from "./App.jsx";
 import { store } from "./redux/store.js";
 import { BrowserRouter } from "react-router-dom";
+// import dotenv from "dotenv";
+// dotenv.config();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

@@ -14,12 +14,13 @@ import { useAppSelector } from "../redux/hooks";
 function OneOnOneMeeting() {
   useAuth();
   const users = useFetchUsers();
+  // console.log(users);
   const { userDetails } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
-  const [setUser, setSetUser] = useState([]);
+  const [selectedUser, setSelectedUser] = useState([]);
   const [meetingName, setMeetingName] = useState("");
-  const [date, setDate] = useState(Date);
-  const [showValidateErrors, setShowValidateErrors] = useState({
+  const [date, setDate] = useState(new Date());
+  const [showErrors, setShowErrors] = useState({
     meetingName: {
       show: false,
       message: [],
@@ -40,7 +41,7 @@ function OneOnOneMeeting() {
       showValidateErrors.meetingName.show = false;
       showValidateErrors.meetingName.message = [];
     }
-    if (!setUser) {
+    if (!selectedUser) {
       showValidateErrors.meetingUser.show = true;
       showValidateErrors.meetingUser.message.push("Meeting User is required");
       errors = true;
@@ -52,7 +53,8 @@ function OneOnOneMeeting() {
     return errors;
   };
   const createMeeting = async (e) => {
-    if (!validateForm) {
+    e.preventDefault();
+    if (!validateForm()) {
       const meetingId = generateMeetingID();
       await addDoc(meetingsRef, {
         meetingId,
@@ -60,10 +62,10 @@ function OneOnOneMeeting() {
         meetingName,
         meetingDate: date,
         meetingType: "1on1",
-        meetingUser: setUser,
+        meetingUser: selectedUser,
       });
+      navigate("/dashboard");
     }
-    navigate("/dashboard");
   };
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900">
@@ -72,19 +74,19 @@ function OneOnOneMeeting() {
           <MeetingNameField
             label="Meeting Name"
             placeholder="Enter Meeting Name"
-            isInValid={showValidateErrors.meetingName.show}
-            error={showValidateErrors.meetingName.message}
+            isInValid={showErrors.meetingName.show}
+            error={showErrors.meetingName.message}
             value={meetingName}
             setMeetingName={setMeetingName}
           />
           <MeetingUserField
             label="Put Users to call"
-            isInValid={showValidateErrors.meetingUser.show}
-            error={showValidateErrors.meetingUser.message}
+            isInValid={showErrors.meetingUser.show}
+            error={showErrors.meetingUser.message}
             placeholder="Select Users"
             options={users}
-            onChange={setSetUser}
-            selectedOptions={setUser}
+            onChange={setSelectedUser}
+            selectedOptions={selectedUser}
             isMultiUser={false}
           />
           <DateField label="Meeting Date" date={date} setDateValue={setDate} />

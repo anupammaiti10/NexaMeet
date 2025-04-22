@@ -10,7 +10,7 @@ import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 // import { useDispatch } from "react-redux";
 import { userDetails } from "../redux/slices/authSlice";
-import {useAppSelector, useAppDispatch } from "../redux/hooks";
+import { useAppDispatch } from "../redux/hooks";
                          
 function Login() {
   const navigate = useNavigate();

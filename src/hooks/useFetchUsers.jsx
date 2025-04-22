@@ -3,9 +3,9 @@ import { getDocs, where, query } from "firebase/firestore";
 import { useAppSelector } from "../redux/hooks";
 import { usersRef } from "../utils/firebaseConfig";
 // import { docs } from 'firebase/firestore'; // or similar
-function useFetchUsers() {
+const useFetchUsers = () => {
   const [users, setUsers] = useState([]);
-  const uid = useAppSelector((state, uid) => state.auth.userDetails?.uid);
+  const uid = useAppSelector((state) => state.auth.userDetails?.uid);
   useEffect(() => {
     const fetchUsers = async () => {
       if (!uid) return; // Ensure uid is available before querying
@@ -13,9 +13,11 @@ function useFetchUsers() {
       const firestoreQuery = query(usersRef, where("uid", "!=", uid));
       const firestoreDocs = await getDocs(firestoreQuery);
       const firebaseUsers = [];
-      firestoreDocs.forEach((user) => {
-        firebaseUsers.push({ ...user, label: user.name });
+      firestoreDocs.docs.forEach((user) => {
+        const userData=user.data();
+        firebaseUsers.push({ ...userData, label: userData.name });
       });
+      console.log(firebaseUsers);
       setUsers(firebaseUsers);
     };
     fetchUsers();
@@ -28,6 +30,6 @@ function useFetchUsers() {
   // "uid": "0f6gUqwHFjXlqU4k1oWctxwdswc2",
   // "label": "Anupam Maiti",
   //  }
-}
+};
 
 export default useFetchUsers;

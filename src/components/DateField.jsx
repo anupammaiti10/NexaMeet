@@ -1,8 +1,9 @@
 import React from "react";
-
+import moment from "moment";
 function DateField({ label, date,setDateValue }) {
     const handleDateValue=(e)=>{
-        const selectedDate = e.target.value;
+        let selectedDate = e.target.value;
+        selectedDate=moment(selectedDate).format("YYYY-MM-DD");
         setDateValue(selectedDate);
     }
   return (

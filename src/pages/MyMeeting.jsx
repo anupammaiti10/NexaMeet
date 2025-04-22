@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
-import { query, where } from "firebase/firestore";
+import moment from "moment";
+import { getDocs, query, where } from "firebase/firestore";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useAppSelector } from "../redux/hooks";
 import openEditLayout from "../components/openEditLayout";
@@ -17,25 +18,27 @@ function MyMeeting() {
         where("createdBy", "==", userDetails.uid)
       );
       const fetchedMeeting = await getDocs(firestoreQuery);
-      if (fetchedMeeting.length) {
+      if (fetchedMeeting.docs.length) {
         const myMeetings = [];
-        fetchedMeeting.forEach((meeting) => {
+        fetchedMeeting.docs.forEach((meeting) => {
+          const oneMeeting = meeting.data();
           myMeetings.push({
-            id: meeting.meetingId,
-            ...meeting.data(),
+            id: oneMeeting.meetingId,
+            ...oneMeeting,
           });
         });
+        console.log(meetings[0]);
         setMeetings(myMeetings);
       }
-    } catch {
+    } catch (err) {
       console.error("Error fetching MyMeetings: ", err);
     }
-  }, [userDetails?.id]);
+  }, [userDetails?.uid]);
   useEffect(() => {
     if (userDetails?.uid) {
       getMyMeeting();
     }
-  }, [getMyMeeting]);
+  }, [getMyMeeting, userDetails?.uid]);
   return (
     <div className="flex flex-col h-screen">
       <div className="flex justify-center my-4">
@@ -53,12 +56,13 @@ function MyMeeting() {
             </thead>
             <tbody>
               {meetings.map((meeting) => {
-                const isToday = meeting.meetingDate === moment().format("L");
+                const isToday =
+                  meeting.meetingDate === moment().format("YYYY-MM-DD");
                 const isFuture = moment(meeting.meetingDate).isAfter(
-                  moment().format("L")
+                  moment().format("YYYY-MM-DD")
                 );
                 const isPast = moment(meeting.meetingDate).isBefore(
-                  moment().format("L")
+                  moment().format("YYYY-MM-DD")
                 );
                 let findingDate = null;
                 if (isToday) {
@@ -101,9 +105,11 @@ function MyMeeting() {
                     <td className="p-2 text-center">
                       <button
                         className="text-blue-500 hover:text-blue-700"
-                        onClick={navigator.clipboard.writeText(
-                          `${process.env.REACT_HOST}/meeting/${meeting.id}`
-                        )}
+                        onClick={() =>
+                          navigator.clipboard.writeText(
+                            `${import.meta.env.VITE_APP_HOST}/meeting/${meeting.id}`
+                          )
+                        }
                       >
                         📋
                       </button>

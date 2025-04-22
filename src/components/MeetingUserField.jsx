@@ -32,8 +32,8 @@ function MeetingUserField({
         >
           <option value="">{placeholder}</option>
           {options.map((option, index) => (
-            <option key={index} value={option.label}>
-              {option.label}
+            <option key={index} value={option.name}>
+              {option.name}
             </option>
           ))}
         </select>

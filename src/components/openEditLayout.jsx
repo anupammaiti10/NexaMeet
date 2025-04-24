@@ -2,10 +2,15 @@ import React, { useState } from "react";
 import MeetingNameField from "./MeetingNameField";
 import MeetingUserField from "./MeetingUserField";
 import CreateMeetingButtons from "./CreateMeetingButtons";
-import { updateDoc } from "firebase/firestore";
-function openEditLayout({ meeting }) {
+import { updateDoc, doc } from "firebase/firestore";
+import useFetchUsers from "../hooks/useFetchUsers";
+import { meetingsRef } from "../utils/firebaseConfig";
+import DateField from "./DateField";
+function OpenEditLayout({ meeting }) {
+  const users = useFetchUsers();
   const [meetingName, setMeetingName] = useState(meeting.meetingName);
   const [updateDate, setUpdateDate] = useState(meeting.meetingDate);
+  const [meetingType, setMeetingType] = useState(meeting.meetingType);
   const [selectedUser, setSelectedUser] = useState(meeting.meetingUser);
   const [showErrors, setShowErrors] = useState({
     meetingName: {
@@ -18,10 +23,11 @@ function openEditLayout({ meeting }) {
     },
   });
   const editMeeting = async (e) => {
+    e.preventDefault(); // Prevent form submission
     if (!showErrors.meetingName.show && !showErrors.meetingUser.show) {
       const meetingData = {
         ...meeting,
-        meetingName,
+        meetingName: meetingName,
         meetingDate: updateDate,
         meetingUser: selectedUser,
       };
@@ -42,7 +48,6 @@ function openEditLayout({ meeting }) {
             error={showErrors.meetingName.message}
             value={meetingName}
             setMeetingName={setMeetingName}
-            isMultiUser={false}
           />
           <MeetingUserField
             label="Put Users to call"
@@ -50,21 +55,16 @@ function openEditLayout({ meeting }) {
             error={showErrors.meetingUser.message}
             placeholder="Select Users"
             options={users}
-            onChange={setSetUser}
-            selectedOptions={setUser}
-            isMultiUser={true}
+            onChange={setSelectedUser}
+            selectedOptions={selectedUser}
+            isMultiUser={meetingType === "1on1" ? false : true}
           />
           <DateField
             label="Meeting Date"
             date={updateDate}
             setDateValue={setUpdateDate}
           />
-          <button
-            onClick={isNaN}
-            className="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"
-          >
-            Cancel
-          </button>
+
           <div className="pt-4">
             <CreateMeetingButtons createMeeting={editMeeting} />
           </div>
@@ -74,4 +74,4 @@ function openEditLayout({ meeting }) {
   );
 }
 
-export default openEditLayout;
+export default OpenEditLayout;

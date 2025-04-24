@@ -4,11 +4,14 @@ import moment from "moment";
 import { getDocs, query, where } from "firebase/firestore";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useAppSelector } from "../redux/hooks";
-import openEditLayout from "../components/openEditLayout";
+import OpenEditLayout from "../components/OpenEditLayout.jsx";
+import { Link } from "react-router-dom";
 
 function MyMeeting() {
   useAuth();
   const [meetings, setMeetings] = useState([]);
+  const [showEditLayout, setShowEditLayout] = useState(false);
+  const [editMeeting, setEditMeeting] = useState(null);
   const userDetails = useAppSelector((state) => state.auth.userDetails);
 
   const getMyMeeting = useCallback(async () => {
@@ -67,9 +70,12 @@ function MyMeeting() {
                 let findingDate = null;
                 if (isToday) {
                   findingDate = (
-                    <span className="text-green-500 font-semibold">
+                    <Link
+                      to={`/join/${meeting.meetingDate}`}
+                      className="px-2 py-1 text-sm bg-green-100 text-green-800 rounded hover:underline"
+                    >
                       Join Now
-                    </span>
+                    </Link>
                   );
                 } else if (isFuture) {
                   findingDate = (
@@ -97,9 +103,12 @@ function MyMeeting() {
                           isPast ? "opacity-50 cursor-not-allowed" : ""
                         }`}
                         disabled={isPast}
-                        onClick={openEditLayout}
+                        onClick={() => {
+                          setShowEditLayout(true);
+                          setEditMeeting(meeting);
+                        }}
                       >
-                        Edit ✎
+                        Edit
                       </button>
                     </td>
                     <td className="p-2 text-center">
@@ -107,7 +116,9 @@ function MyMeeting() {
                         className="text-blue-500 hover:text-blue-700"
                         onClick={() =>
                           navigator.clipboard.writeText(
-                            `${import.meta.env.VITE_APP_HOST}/meeting/${meeting.id}`
+                            `${import.meta.env.VITE_APP_HOST}/meeting/${
+                              meeting.id
+                            }`
                           )
                         }
                       >
@@ -119,6 +130,7 @@ function MyMeeting() {
               })}
             </tbody>
           </table>
+          {showEditLayout && <OpenEditLayout meeting={editMeeting} />}
         </div>
       </div>
     </div>

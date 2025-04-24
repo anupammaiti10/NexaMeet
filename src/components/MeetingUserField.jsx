@@ -38,7 +38,7 @@ function MeetingUserField({
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:ring-blue-500"
           }`}
-          value= ""
+          value={selectedOptions?.[0]}
           onChange={selectUserFunction}
         >
           <option value="">{placeholder}</option>
@@ -48,16 +48,34 @@ function MeetingUserField({
             </option>
           ))}
         </select>
-        {isMultiUser && (
-          <button
-            type="button"
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-red-500"
-            onClick={() => onChange([])}
-          >
-            &times;
-          </button>
-        )}
       </div>
+      {safeSelectedOptions?.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {safeSelectedOptions.map((option, idx) => (
+            <div
+              key={idx}
+              className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm flex items-center"
+            >
+              <span>{option}</span>
+              {isMultiUser && (
+                <button
+                  className="ml-1 text-blue-500 hover:text-red-500"
+                  onClick={() => {
+                    const newSelected = selectedOptions.filter(
+                      (_, i) => i !== idx
+                    );
+                    onChange(newSelected);
+                  }}
+                  type="button"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      
       {isInValid && error?.length > 0 && (
         <ul className="mt-1 text-sm text-red-600 space-y-0.5">
           {error.map((msg, idx) => (

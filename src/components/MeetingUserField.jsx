@@ -10,10 +10,21 @@ function MeetingUserField({
   selectedOptions,
   isMultiUser,
 }) {
+  const safeSelectedOptions = Array.isArray(selectedOptions)
+    ? selectedOptions
+    : [];
   const selectUserFunction = (e) => {
     const selectUser = e.target.value;
-    const selectedOption = options.find((ops) => ops.label === selectUser);
-    onChange(selectedOption ? [selectUser] : []);
+    let newSelectedOptions;
+    if (!isMultiUser) {
+      newSelectedOptions = [selectUser];
+    } else {
+      newSelectedOptions = [...safeSelectedOptions];
+      newSelectedOptions.push(selectUser);
+      // if (!newSelectedOptions.includes(selectUser)) {
+      // }
+    }
+    onChange(newSelectedOptions);
   };
   return (
     <div className="w-full">
@@ -27,7 +38,7 @@ function MeetingUserField({
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:ring-blue-500"
           }`}
-          value={selectedOptions[0]}
+          value= ""
           onChange={selectUserFunction}
         >
           <option value="">{placeholder}</option>
@@ -39,6 +50,7 @@ function MeetingUserField({
         </select>
         {isMultiUser && (
           <button
+            type="button"
             className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-red-500"
             onClick={() => onChange([])}
           >
@@ -49,7 +61,7 @@ function MeetingUserField({
       {isInValid && error?.length > 0 && (
         <ul className="mt-1 text-sm text-red-600 space-y-0.5">
           {error.map((msg, idx) => (
-            <li key={idx}>• {msg}</li>
+            <li key={idx}>{msg}</li>
           ))}
         </ul>
       )}

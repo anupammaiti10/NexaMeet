@@ -7,6 +7,7 @@ import DateField from "../components/DateField";
 import CreateMeetingButtons from "../components/CreateMeetingButtons";
 import { generateMeetingID } from "../utils/generateMeetingID";
 import { addDoc } from "firebase/firestore";
+import moment from "moment";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../redux/hooks";
@@ -60,7 +61,7 @@ function OneOnOneMeeting() {
         meetingId,
         createdBy: userDetails.uid,
         meetingName,
-        meetingDate: date,
+        meetingDate: moment(date).format("YYYY-MM-DD"),
         meetingType: "1on1",
         meetingUser: selectedUser,
       });

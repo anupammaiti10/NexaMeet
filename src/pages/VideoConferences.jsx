@@ -7,17 +7,18 @@ import DateField from "../components/DateField";
 import CreateMeetingButtons from "../components/CreateMeetingButtons";
 import { generateMeetingID } from "../utils/generateMeetingID";
 import { addDoc } from "firebase/firestore";
+import moment from "moment";
 import { meetingsRef } from "../utils/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../redux/hooks";
 function VideoConferences() {
   useAuth();
   const users = useFetchUsers();
-  const { userDetails } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
+  const { userDetails } = useAppSelector((state) => state.auth);
   const [selectedUser, setSelectedUser] = useState([]);
   const [meetingName, setMeetingName] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(moment());
   const [showErrors, setShowErrors] = useState({
     meetingName: {
       show: false,
@@ -51,14 +52,15 @@ function VideoConferences() {
     return errors;
   };
   const createMeeting = async (e) => {
+    e.preventDefault();
     if (!validateForm()) {
       const meetingId = generateMeetingID();
       await addDoc(meetingsRef, {
-        createdBy: userDetails.uid,
-        meetingDate: date,
         meetingId,
+        createdBy: userDetails.uid,
         meetingName,
         meetingType: "videoConference",
+        meetingDate: moment(date).format("YYYY-MM-DD"),
         meetingUser: selectedUser,
       });
       navigate("/dashboard");

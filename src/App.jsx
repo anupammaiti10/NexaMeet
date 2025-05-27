@@ -7,6 +7,7 @@ import Meeting from "./pages/Meeting";
 import MyMeeting from "./pages/MyMeeting";
 import OneOnOneMeeting from "./pages/OneOnOneMeeting";
 import VideoConferences from "./pages/VideoConferences";
+import JoinMeeting from "./pages/JoinMeeting";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/createmeeting" element={<CreateMeeting />} />
       <Route path="/meeting1on1" element={<OneOnOneMeeting />} />
       <Route path="/videoconference" element={<VideoConferences />} />
+      <Route path="/join/:id" element={<JoinMeeting />} />
       <Route path="/meeting" element={<Meeting />} />
       <Route path="/mymeeting" element={<MyMeeting />} />
     </Routes>

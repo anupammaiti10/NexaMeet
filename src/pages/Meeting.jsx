@@ -8,7 +8,7 @@ import moment from "moment";
 function Meeting() {
   useAuth();
   const userDetails = useAppSelector((state) => state.auth.userDetails);
-  const [meetings, setMeetings] = useState([]);
+  const [meetings, setMeetings] = useState([]);    
   useEffect(() => {
     const fetchedMeetings = async () => {
       try {
@@ -46,9 +46,9 @@ function Meeting() {
     if (meeting.meetingDate === today) {
       return (
         <Link
-          to={`/join/${meeting.meetingDate}`}
+          to={`/join/${meeting.meetingId}`}
           className="px-2 py-1 text-sm bg-green-100 text-green-800 rounded hover:underline"
-        >
+        >             
           Join Now
         </Link>
       );

@@ -1,9 +1,11 @@
-import React, { useEffect, useRef } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import React, { useEffect, useRef, useState } from "react";
+import { MeetingProvider } from "@videosdk.live/react-sdk";
 import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth, meetingsRef } from "../utils/firebaseConfig";
 import { useNavigate, useParams } from "react-router-dom";
 import { getDoc, query, where } from "firebase/firestore";
+import MeetingView from "../components/MeetingView";
+
 function JoinMeeting() {
   const [user, setUser] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -11,6 +13,7 @@ function JoinMeeting() {
   const joinMeetingRef = useRef();
   const navigate = useNavigate();
   const params = useParams();
+  console.log(params.id);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
       setUser(user);
@@ -31,7 +34,7 @@ function JoinMeeting() {
           console.log(meetingData);
           const isInvited =
             meetingData.meetingType === "1on1"
-              ? meetingData.meetingUser[0] === user?.uid
+              ? meetingData.meetingUser[0] === user?.name
               : meetingData.meetingUser.find((user) => user.uid === user?.uid);
           if (isInvited) {
             if (meetingData.meetingDate === moment().format("YYYY-MM-DD")) {
@@ -50,37 +53,92 @@ function JoinMeeting() {
       }
       getMeetingData();
     };
-  },[]);
+  }, [loaded, params.id, user?.uid, navigate]);
 
-  const initializeMeeting = async () => {
-    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      process.env.REACT_APP_ZEGOCLOUD_APP_ID,
-      process.env.REACT_APP_ZEGOCLOUD_SERVER_SECRET,
-      params.id,
-      user?.id,
-      user?.name
-    );
-    // Create instance and join room
-    const zp = ZegoUIKitPrebuilt.create(kitToken);
+  const initializeMeeting = async () => {          
+    try {
+      const apiKey = import.meta.env.VITE_VIDEOSDK_API_KEY; // Get from VideoSDK dashboard
+      const meetingId = params?.id;
+      console.log(meetingId);
+      const name = user?.name;
 
-    zp.joinRoom({
-      container: joinMeetingRef.current,
-      maxUsers: 50,
-      sharedLinks: [
-        {
-          name: "Personal link",
-          url: window.location.href,
+      const config = {
+        name: name,
+        meetingId: meetingId,
+        apiKey: apiKey,
+
+        containerId: joinMeetingRef.current,
+
+        micEnabled: true,
+        webcamEnabled: true,
+        participantCanToggleSelfWebcam: true,
+        participantCanToggleSelfMic: true,
+
+        chatEnabled: true,
+        screenShareEnabled: true,
+        pollEnabled: true,
+        whiteboardEnabled: true,
+
+        permissions: {
+          askToJoin: false, // Set true for webinar mode
+          toggleParticipantWebcam: true,
+          toggleParticipantMic: true,
+          removeParticipant: true,
+          endMeeting: true,
+          drawOnWhiteboard: true,
+          toggleWhiteboard: true,
         },
-      ],
-      scenario: {
-        mode: ZegoUIKitPrebuilt.VideoConference,
-      },
-    });
+
+        joinScreen: {
+          visible: true, // Show the join screen
+          // title: "Daily Standup", // Meeting title
+          meetingUrl: window.location.href, // Meeting URL
+        },
+
+        // participantLeft: () => {
+        //   // Handle participant leaving
+        // },
+      };
+
+      const meeting = new MeetingProvider(config);
+      meeting.on("meeting-joined", () => {
+        setJoined(true);
+        console.log("Meeting Joined Successfully");
+      });
+
+      meeting.on("meeting-left", () => {
+        console.log("Meeting Left");
+      });
+      // Join the meeting
+      meeting.join();
+
+      return meeting;
+    } catch (err) {
+      console.log(err);
+    }
   };
 
+  useEffect(() => {
+    let meetingInstance;
+
+    if (isAllowed && joinMeetingRef.current) {
+      const joinMeeting = async () => {
+        meetingInstance = await initializeMeeting();
+      };
+      joinMeeting();
+    }
+
+    return () => {
+      if (meetingInstance) {
+        meetingInstance.leave();
+      }
+    };
+  }, [isAllowed]);
 
   return isAllowed ? (
-    <div ref={joinMeetingRef} className="w-full h-full"></div>
+    <div ref={joinMeetingRef} className="w-full h-full">
+      {<MeetingView meetingId={params.id} />}
+    </div>
   ) : null;
 }
 

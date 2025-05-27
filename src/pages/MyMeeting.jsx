@@ -71,7 +71,7 @@ function MyMeeting() {
                 if (isToday) {
                   findingDate = (
                     <Link
-                      to={`/join/${meeting.meetingDate}`}
+                      to={`/join/${meeting.meetingId}`}
                       className="px-2 py-1 text-sm bg-green-100 text-green-800 rounded hover:underline"
                     >
                       Join Now
@@ -116,7 +116,7 @@ function MyMeeting() {
                         className="text-blue-500 hover:text-blue-700"
                         onClick={() =>
                           navigator.clipboard.writeText(
-                            `${import.meta.env.VITE_APP_HOST}/meeting/${
+                            `${import.meta.env.VITE_APP_HOST}/meeting/:${
                               meeting.id
                             }`
                           )

@@ -18,7 +18,7 @@ A real-time video conferencing application built with React, Firebase, and WebRT
 - **Authentication**: Firebase Auth
 - **Database**: Firebase Firestore
 - **Styling**: Tailwind CSS
-- **Real-time Communication**: WebRTC
+- **Real-time Communication**: ZEGOCLOUD Framework
 
 ## Getting Started
 

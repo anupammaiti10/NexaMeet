@@ -1,145 +1,159 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MeetingProvider } from "@videosdk.live/react-sdk";
 import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth, meetingsRef } from "../utils/firebaseConfig";
 import { useNavigate, useParams } from "react-router-dom";
-import { getDoc, query, where } from "firebase/firestore";
+import { getDocs, query, where } from "firebase/firestore";
 import MeetingView from "../components/MeetingView";
+import moment from "moment";
 
-function JoinMeeting() {
+function JoinMeeting({ token }) {
   const [user, setUser] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [isAllowed, setIsAllowed] = useState(false);
-  const joinMeetingRef = useRef();
+  const [joined, setJoined] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const navigate = useNavigate();
   const params = useParams();
-  console.log(params.id);
+  
+  console.log("Meeting ID:", params.id);
+  console.log("Token:", token);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+      console.log("Auth state changed:", user);
       setUser(user);
       setLoaded(true);
     });
     return () => unsubscribe();
-  });
+  }, []);
+
   useEffect(() => {
     const getMeetingData = async () => {
-      if (loaded) {
-        const firebaseQuery = await query(
+      if (!loaded || !user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        console.log("Fetching meeting data for ID:", params?.id);
+        
+        const firebaseQuery = query(
           meetingsRef,
-          where("meetingId", "==", params.id)
+          where("meetingId", "==", params?.id)
         );
-        const fetchedMeeting = await getDoc(firebaseQuery);
-        if (fetchedMeeting) {
-          const meetingData = fetchedMeeting.docs.data();
-          console.log(meetingData);
+        
+        const fetchedMeeting = await getDocs(firebaseQuery); // Changed from getDoc to getDocs
+        
+        if (!fetchedMeeting.empty) {
+          const meetingData = fetchedMeeting.docs[0].data(); // Get first document's data
+          console.log("Meeting data:", meetingData);
+          
           const isInvited =
             meetingData.meetingType === "1on1"
-              ? meetingData.meetingUser[0] === user?.name
-              : meetingData.meetingUser.find((user) => user.uid === user?.uid);
+              ? meetingData.meetingUser[0] === user?.displayName
+              : meetingData.meetingUser.find((u) => u.uid === user?.uid);
+          
+          console.log("Is invited:", isInvited);
+          
           if (isInvited) {
-            if (meetingData.meetingDate === moment().format("YYYY-MM-DD")) {
+            const today = moment().format("YYYY-MM-DD");
+            const meetingDate = meetingData.meetingDate;
+            
+            console.log("Today:", today, "Meeting date:", meetingDate);
+            
+            if (meetingDate === today) {
               setIsAllowed(true);
-            } else if (
-              moment(meetingData.meetingDate).isBefore(
-                moment.format("YYYY-MM-DD")
-              )
-            ) {
+            } else if (moment(meetingDate).isBefore(today)) {
+              console.log("Meeting date has passed");
               navigate("/createmeeting");
             } else {
+              console.log("Meeting is in the future");
               navigate("/dashboard");
             }
+          } else {
+            console.log("User not invited to this meeting");
+            setError("You are not invited to this meeting");
           }
+        } else {
+          console.log("Meeting not found");
+          setError("Meeting not found");
         }
+      } catch (err) {
+        console.error("Error fetching meeting data:", err);
+        setError("Error loading meeting data");
+      } finally {
+        setLoading(false);
       }
-      getMeetingData();
     };
-  }, [loaded, params.id, user?.uid, navigate]);
 
-  const initializeMeeting = async () => {          
-    try {
-      const apiKey = import.meta.env.VITE_VIDEOSDK_API_KEY; // Get from VideoSDK dashboard
-      const meetingId = params?.id;
-      console.log(meetingId);
-      const name = user?.name;
+    getMeetingData(); // Moved inside useEffect
+  }, [loaded, params.id, user, navigate]);
 
-      const config = {
-        name: name,
-        meetingId: meetingId,
-        apiKey: apiKey,
-
-        containerId: joinMeetingRef.current,
-
-        micEnabled: true,
-        webcamEnabled: true,
-        participantCanToggleSelfWebcam: true,
-        participantCanToggleSelfMic: true,
-
-        chatEnabled: true,
-        screenShareEnabled: true,
-        pollEnabled: true,
-        whiteboardEnabled: true,
-
-        permissions: {
-          askToJoin: false, // Set true for webinar mode
-          toggleParticipantWebcam: true,
-          toggleParticipantMic: true,
-          removeParticipant: true,
-          endMeeting: true,
-          drawOnWhiteboard: true,
-          toggleWhiteboard: true,
-        },
-
-        joinScreen: {
-          visible: true, // Show the join screen
-          // title: "Daily Standup", // Meeting title
-          meetingUrl: window.location.href, // Meeting URL
-        },
-
-        // participantLeft: () => {
-        //   // Handle participant leaving
-        // },
-      };
-
-      const meeting = new MeetingProvider(config);
-      meeting.on("meeting-joined", () => {
-        setJoined(true);
-        console.log("Meeting Joined Successfully");
-      });
-
-      meeting.on("meeting-left", () => {
-        console.log("Meeting Left");
-      });
-      // Join the meeting
-      meeting.join();
-
-      return meeting;
-    } catch (err) {
-      console.log(err);
-    }
+  const handleJoinClick = () => {
+    console.log("Joining meeting...");
+    setJoined(true);
   };
 
-  useEffect(() => {
-    let meetingInstance;
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading meeting...</div>
+      </div>
+    );
+  }
 
-    if (isAllowed && joinMeetingRef.current) {
-      const joinMeeting = async () => {
-        meetingInstance = await initializeMeeting();
-      };
-      joinMeeting();
-    }
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500 text-lg">{error}</div>
+      </div>
+    );
+  }
 
-    return () => {
-      if (meetingInstance) {
-        meetingInstance.leave();
-      }
-    };
-  }, [isAllowed]);
+  // Not allowed or no token
+  if (!isAllowed || !token) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">
+          {!token ? "No token available" : "Access denied"}
+        </div>
+      </div>
+    );
+  }
 
-  return isAllowed ? (
-    <div ref={joinMeetingRef} className="w-full h-full">
-      {<MeetingView meetingId={params.id} />}
+  return (
+    <div className="min-h-screen">
+      {!joined ? (
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <h2 className="text-2xl mb-4">Ready to join meeting?</h2>
+          <button
+            onClick={handleJoinClick}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+          >
+            Join Meeting
+          </button>
+        </div>
+      ) : (
+        <MeetingProvider
+          config={{
+            meetingId: params?.id,
+            micEnabled: true,
+            webcamEnabled: true,
+            name: user?.displayName || user?.email || "Guest",
+          }}
+          token={token}
+        >
+          <MeetingView />
+        </MeetingProvider>
+      )}
     </div>
-  ) : null;
+  );
 }
 
 export default JoinMeeting;

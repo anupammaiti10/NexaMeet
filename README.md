@@ -1,4 +1,4 @@
-# Zoom App Clone
+# NEXAMEET
 
 A real-time video conferencing application built with React, Firebase, and WebRTC.
 

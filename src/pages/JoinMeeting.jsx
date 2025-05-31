@@ -6,8 +6,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getDocs, query, where } from "firebase/firestore";
 import MeetingView from "../components/MeetingView";
 import moment from "moment";
+import useAuth from "../hooks/useAuth";
 
 function JoinMeeting({ token }) {
+  useAuth(); // Ensure user is authenticated
   const [user, setUser] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [isAllowed, setIsAllowed] = useState(false);
@@ -17,9 +19,9 @@ function JoinMeeting({ token }) {
   
   const navigate = useNavigate();
   const params = useParams();
-  
+                
   console.log("Meeting ID:", params.id);
-  console.log("Token:", token);
+  console.log("Token in the JoinMeeting component:", token);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
@@ -94,7 +96,7 @@ function JoinMeeting({ token }) {
   }, [loaded, params.id, user, navigate]);
 
   const handleJoinClick = () => {
-    console.log("Joining meeting...");
+    console.log("Joining meeting in JoinMeeting...");
     setJoined(true);
   };
 
@@ -121,7 +123,7 @@ function JoinMeeting({ token }) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">
-          {!token ? "No token available" : "Access denied"}
+          {!token || !isAllowed ? "No token available or not allowed" : "Access denied"}
         </div>
       </div>
     );
@@ -146,6 +148,14 @@ function JoinMeeting({ token }) {
             micEnabled: true,
             webcamEnabled: true,
             name: user?.displayName || user?.email || "Guest",
+             // Add these additional config options
+            participantCanToggleSelfWebcam: true,
+            participantCanToggleSelfMic: true,
+            chatEnabled: true,
+            screenShareEnabled: true,
+            maxResolution: "hd",
+            // Ensure proper initialization
+            joinWithoutUserInteraction: false,
           }}
           token={token}
         >
